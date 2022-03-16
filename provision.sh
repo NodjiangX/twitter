@@ -25,15 +25,11 @@ echo "开始下载mysql"
 if ! [ -e /vagrant/mysql-apt-config_0.8.15-1_all.deb ]; then
 	wget -c https://dev.mysql.com/get/mysql-apt-config_0.8.15-1_all.deb
 fi
-echo "1开始安装mysql"
 sudo dpkg -i mysql-apt-config_0.8.15-1_all.deb
-echo "2开始安装mysql"
 #sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
 sudo DEBIAN_FRONTEND=noninteractive apt-get install -y mysql-server
 #sudo mysql -h127.0.0.1 -P3306 -uroot -e"UPDATE mysql.user SET password = PASSWORD('yourpassword') WHERE user = 'root'"
-echo "3333开始安装mysql"
 sudo apt-get install -y libmysqlclient-dev
-echo "安装pip3！！！！！"
 if [ ! -f "/usr/bin/pip" ]; then
 	sudo apt-get install -y python3-pip
 	sudo apt-get install -y python-setuptools
@@ -41,7 +37,6 @@ if [ ! -f "/usr/bin/pip" ]; then
 else 
 	echo "pip3 已安装"
 fi
-echo "设置数据库！！！！"
 
 # 设置mysql的root账户的密码为nodjiang
 # 创建名为twitter的数据库
@@ -52,6 +47,25 @@ sudo mysql -u root << EOF
 	CREATE DATABASE IF NOT EXISTS twitter;
 EOF
 # fi
+# superuser名字
+USER="admin"
+# superuser密码
+PASS="admin"
+# superuser邮箱
+MAIL="admin@twitter.com"
+script="
+from django.contrib.auth.models import User;
+username = '$USER';
+password = '$PASS';
+email = '$MAIL';
+if not User.objects.filter(username=username).exists():
+User.objects.create_superuser(username, email, password);
+print('Superuser created.');
+else:
+print('Superuser creation skipped.');
+"
+printf "$script" | python manage.py shell
+
 # 如果想直接进⼊/vagrant路径下
 # 请输⼊vagrant ssh命令进⼊
 # ⼿动输⼊
